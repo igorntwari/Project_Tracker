@@ -14,8 +14,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       appBar: AppBar(
         title: const Text('Create Task'),
       ),
-      body: const Center(
-        child: Text('Create Task Form Placeholder'),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(
+          child: Text('Task Form Coming Soon'),
+        ),
       ),
     );
   }
