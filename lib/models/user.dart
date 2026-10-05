@@ -3,12 +3,14 @@ class User {
   final String name;
   final String role;
   final String initials;
+  final String? avatarUrl; // Profile picture; initials are shown if it's missing
 
   User({
     this.id,
     required this.name,
     required this.role,
     required this.initials,
+    this.avatarUrl,
   });
 
   // Convert a User into a Map. The keys must correspond to the names of the
@@ -19,6 +21,7 @@ class User {
       'name': name,
       'role': role,
       'initials': initials,
+      'avatarUrl': avatarUrl,
     };
   }
 
@@ -29,6 +32,7 @@ class User {
       name: map['name'],
       role: map['role'],
       initials: map['initials'],
+      avatarUrl: map['avatarUrl'],
     );
   }
 }
