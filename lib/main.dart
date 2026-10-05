@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'screens/main_screen.dart';
 import 'widgets/task_widgets.dart';
+import 'screens/signin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: kPrimaryBlue),
       ),
       // MainScreen holds the bottom navigation bar (Home, Tasks, Team, Profile)
-      home: const MainScreen(),
+      home: const SignInScreen(),
     );
   }
 }
