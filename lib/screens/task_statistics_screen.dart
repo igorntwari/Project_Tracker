@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'database/database_helper.dart';
-import 'models/task_model.dart';
+import '../database/database_helper.dart';
+import '../models/task_model.dart';
 
 class TaskStatisticsScreen extends StatefulWidget {
   const TaskStatisticsScreen({super.key});
@@ -77,9 +77,7 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            // Navigator.pop(context); // Un-comment when navigation is connected
-          },
+          onPressed: () => Navigator.maybePop(context),
         ),
         title: const Text(
           'Task Statistics',
