@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'database/database_helper.dart';
-import 'models/user.dart';
+import '../database/database_helper.dart';
+import '../models/user.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  // Called by the back button when Profile is shown as a tab (goes to the previous tab)
+  final VoidCallback? onBack;
+
+  const ProfileScreen({super.key, this.onBack});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -47,7 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // Handle back action (e.g., Navigator.pop(context))
+            // As a tab, go back to the previous tab; when pushed, pop the route
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else {
+              Navigator.maybePop(context);
+            }
           },
         ),
         title: const Text(

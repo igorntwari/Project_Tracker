@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'create_task_screen.dart';
+import 'screens/create_task_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,9 +10,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'Project & SLA Task Tracker',
       debugShowCheckedModeBanner: false,
-      home: CreateTaskScreen(), // <--- Points to your screen
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1D61E7),
+        ),
+        useMaterial3: true,
+      ),
+      home: const CreateTaskScreen(),
     );
   }
 }

@@ -39,6 +39,20 @@ class TaskModel {
     return 'On Track';
   }
 
+  // Returns a copy of this task with the given fields replaced (used when updating)
+  TaskModel copyWith({String? status, String? notes}) {
+    return TaskModel(
+      id: id,
+      title: title,
+      description: description,
+      assignedToId: assignedToId,
+      dueDate: dueDate,
+      priority: priority,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

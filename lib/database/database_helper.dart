@@ -25,9 +25,18 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'project_tracker.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  // Version 2 added profile pictures and more sample tasks. The app only holds
+  // sample data so far, so we simply rebuild the tables with the new seed data.
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    await db.execute('DROP TABLE IF EXISTS tasks');
+    await db.execute('DROP TABLE IF EXISTS users');
+    await _onCreate(db, newVersion);
   }
 
   // Creates the database tables and populates initial dummy data
@@ -37,7 +46,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         role TEXT,
-        initials TEXT
+        initials TEXT,
+        avatarUrl TEXT
       )
     ''');
 
@@ -60,45 +70,126 @@ class DatabaseHelper {
   }
 
   Future<void> _seedDummyData(Database db) async {
-    // Insert dummy users matching the wireframes
+    // Insert dummy users matching the wireframes (photos from randomuser.me)
     List<User> dummyUsers = [
-      User(name: 'John Doe', role: 'Project Manager', initials: 'JD'),
-      User(name: 'Sarah Lee', role: 'UI/UX Designer', initials: 'SL'),
-      User(name: 'Michael Kim', role: 'Mobile Developer', initials: 'MK'),
-      User(name: 'Emily Wong', role: 'QA Tester', initials: 'EW'),
-      User(name: 'David Liu', role: 'Documentation', initials: 'DL'),
+      User(name: 'John Doe', role: 'Project Manager', initials: 'JD', avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg'),
+      User(name: 'Sarah Lee', role: 'UI/UX Designer', initials: 'SL', avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg'),
+      User(name: 'Michael Kim', role: 'Mobile Developer', initials: 'MK', avatarUrl: 'https://randomuser.me/api/portraits/men/75.jpg'),
+      User(name: 'Emily Wong', role: 'QA Tester', initials: 'EW', avatarUrl: 'https://randomuser.me/api/portraits/women/65.jpg'),
+      User(name: 'David Liu', role: 'Documentation', initials: 'DL', avatarUrl: 'https://randomuser.me/api/portraits/men/46.jpg'),
     ];
 
     for (var user in dummyUsers) {
       await db.insert('users', user.toMap());
     }
 
+    // Due dates are relative to today so every SLA status shows up:
+    // more than 2 days away = On Track, within 2 days = At Risk, past = Overdue
+    DateTime now = DateTime.now();
+    String inDays(int days) => now.add(Duration(days: days)).toIso8601String();
+
     // Insert dummy tasks matching the wireframes
     List<TaskModel> dummyTasks = [
+      // On Track
       TaskModel(
         title: 'Design Login Screen',
         description: 'Create a clean and modern login screen for the application.',
         assignedToId: 2, // Sarah Lee
-        dueDate: DateTime.now().add(const Duration(days: 5)).toIso8601String(),
+        dueDate: inDays(5),
         priority: 'High',
         status: 'In Progress',
         notes: 'Waiting for final logo assets.',
       ),
       TaskModel(
+        title: 'Team Members Screen',
+        description: 'Show every team member with their role and initials.',
+        assignedToId: 2, // Sarah Lee
+        dueDate: inDays(7),
+        priority: 'Medium',
+        status: 'In Progress',
+      ),
+      TaskModel(
+        title: 'Write User Guide',
+        description: 'Document how to create, track and complete tasks in the app.',
+        assignedToId: 5, // David Liu
+        dueDate: inDays(8),
+        priority: 'Low',
+        status: 'In Progress',
+      ),
+      TaskModel(
+        title: 'Test Application',
+        description: 'Test every screen and report any bugs found.',
+        assignedToId: 4, // Emily Wong
+        dueDate: inDays(10),
+        priority: 'Medium',
+        status: 'To Do',
+      ),
+      TaskModel(
+        title: 'Prepare Demo',
+        description: 'Prepare the slides and the demo script for the presentation.',
+        assignedToId: 5, // David Liu
+        dueDate: inDays(13),
+        priority: 'Low',
+        status: 'To Do',
+      ),
+      // At Risk
+      TaskModel(
         title: 'Implement Local Storage',
         description: 'Use sqflite to persist data locally.',
         assignedToId: 3, // Michael Kim
-        dueDate: DateTime.now().add(const Duration(days: 1)).toIso8601String(), // At Risk
+        dueDate: inDays(1),
         priority: 'High',
-        status: 'To Do',
+        status: 'In Progress',
       ),
+      TaskModel(
+        title: 'Build Task List Screen',
+        description: 'List all tasks with search, filters and SLA badges.',
+        assignedToId: 3, // Michael Kim
+        dueDate: inDays(2),
+        priority: 'High',
+        status: 'In Progress',
+      ),
+      TaskModel(
+        title: 'Define SLA Rules',
+        description: 'Decide when a task becomes At Risk or Overdue.',
+        assignedToId: 1, // John Doe
+        dueDate: inDays(1),
+        priority: 'Medium',
+        status: 'In Progress',
+      ),
+      // Overdue
       TaskModel(
         title: 'Create Task Model',
         description: 'Define the data models for the application.',
         assignedToId: 1, // John Doe
-        dueDate: DateTime.now().subtract(const Duration(days: 2)).toIso8601String(), // Overdue
+        dueDate: inDays(-2),
         priority: 'Medium',
         status: 'In Progress',
+      ),
+      TaskModel(
+        title: 'Fix Profile Screen Bugs',
+        description: 'Fix the layout overflow on small screens.',
+        assignedToId: 4, // Emily Wong
+        dueDate: inDays(-1),
+        priority: 'High',
+        status: 'In Progress',
+      ),
+      // Completed
+      TaskModel(
+        title: 'Setup Project Repository',
+        description: 'Create the Flutter project and the GitHub repository.',
+        assignedToId: 1, // John Doe
+        dueDate: inDays(-6),
+        priority: 'High',
+        status: 'Completed',
+      ),
+      TaskModel(
+        title: 'Design App Icon',
+        description: 'Create the launcher icon for Android and iOS.',
+        assignedToId: 2, // Sarah Lee
+        dueDate: inDays(-3),
+        priority: 'Low',
+        status: 'Completed',
       ),
     ];
 
