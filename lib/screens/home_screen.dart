@@ -1,7 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/task_model.dart';
 import '../widgets/main_app_bar.dart';
+import 'task_statistics_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback? onAvatarTap;
@@ -28,6 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       await _tasksFuture;
     } catch (_) {}
+  }
+
+  Future<void> _openStatistics() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const TaskStatisticsScreen()),
+    );
+    if (!mounted) return;
+    _refresh();
   }
 
   @override
@@ -66,6 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
     int count(String sla) => tasks.where((t) => t.slaStatus == sla).length;
 
     final total = tasks.length;
+    final onTrack = count('On Track');
+    final atRisk = count('At Risk');
+    final overdue = count('Overdue');
     final completed = count('Completed');
     final progress = total == 0 ? 0.0 : completed / total;
     final attention = tasks
@@ -130,19 +143,19 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _StatCard(
                 label: 'On Track',
-                count: count('On Track'),
+                count: onTrack,
                 color: slaColor('On Track'),
                 icon: Icons.trending_up,
               ),
               _StatCard(
                 label: 'At Risk',
-                count: count('At Risk'),
+                count: atRisk,
                 color: slaColor('At Risk'),
                 icon: Icons.warning_amber_rounded,
               ),
               _StatCard(
                 label: 'Overdue',
-                count: count('Overdue'),
+                count: overdue,
                 color: slaColor('Overdue'),
                 icon: Icons.error_outline,
               ),
@@ -153,6 +166,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.check_circle_outline,
               ),
             ],
+          ),
+          const SizedBox(height: 16),
+          _TaskOverviewCard(
+            total: total,
+            onTrack: onTrack,
+            atRisk: atRisk,
+            overdue: overdue,
+            completed: completed,
+            onTap: _openStatistics,
           ),
           const SizedBox(height: 24),
           const Text(
@@ -183,6 +205,215 @@ Color slaColor(String sla) {
       return Colors.green;
     default:
       return Colors.blue;
+  }
+}
+
+class _TaskOverviewCard extends StatelessWidget {
+  final int total;
+  final int onTrack;
+  final int atRisk;
+  final int overdue;
+  final int completed;
+  final VoidCallback onTap;
+
+  const _TaskOverviewCard({
+    required this.total,
+    required this.onTrack,
+    required this.atRisk,
+    required this.overdue,
+    required this.completed,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Task Overview',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        'View statistics',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(120, 120),
+                          painter: _DonutPainter(
+                            values: [
+                              onTrack.toDouble(),
+                              atRisk.toDouble(),
+                              overdue.toDouble(),
+                              completed.toDouble(),
+                            ],
+                            colors: [
+                              slaColor('On Track'),
+                              slaColor('At Risk'),
+                              slaColor('Overdue'),
+                              slaColor('Completed'),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '$total',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text(
+                              'Tasks',
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _LegendRow(
+                          label: 'On Track',
+                          count: onTrack,
+                          color: slaColor('On Track'),
+                        ),
+                        _LegendRow(
+                          label: 'At Risk',
+                          count: atRisk,
+                          color: slaColor('At Risk'),
+                        ),
+                        _LegendRow(
+                          label: 'Overdue',
+                          count: overdue,
+                          color: slaColor('Overdue'),
+                        ),
+                        _LegendRow(
+                          label: 'Completed',
+                          count: completed,
+                          color: slaColor('Completed'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendRow extends StatelessWidget {
+  final String label;
+  final int count;
+  final Color color;
+
+  const _LegendRow({
+    required this.label,
+    required this.count,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Text(label)),
+          Text('$count', style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+}
+
+class _DonutPainter extends CustomPainter {
+  final List<double> values;
+  final List<Color> colors;
+
+  _DonutPainter({required this.values, required this.colors});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const strokeWidth = 20.0;
+    final rect = Rect.fromLTWH(
+      strokeWidth / 2,
+      strokeWidth / 2,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
+    );
+    final total = values.fold<double>(0, (sum, v) => sum + v);
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    if (total == 0) {
+      paint.color = Colors.grey.shade300;
+      canvas.drawArc(rect, 0, 2 * pi, false, paint);
+      return;
+    }
+
+    double start = -pi / 2;
+    for (int i = 0; i < values.length; i++) {
+      final sweep = values[i] / total * 2 * pi;
+      paint.color = colors[i];
+      canvas.drawArc(rect, start, sweep, false, paint);
+      start += sweep;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DonutPainter oldDelegate) {
+    return oldDelegate.values != values;
   }
 }
 
