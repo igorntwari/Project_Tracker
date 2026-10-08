@@ -27,7 +27,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   List<User> _assignableUsers = [];
   User? _selectedAssignee;
   DateTime? _selectedDueDate;
-  
+
   String _selectedPriority = 'Medium';
   String _selectedStatus = 'To Do';
 
@@ -120,14 +120,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     setState(() => _isSaving = true);
 
     try {
-      final newTask = Task(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        assignedUserId: _selectedAssignee!.id,
-        dueDate: _selectedDueDate!.toIso8601String(),
-        priority: _selectedPriority,
-        status: _selectedStatus,
-      );
+  final newTask = TaskModel(
+    title: _titleController.text.trim(),
+    description: _descriptionController.text.trim(),
+    assignedToId: _selectedAssignee!.id!,
+    dueDate: _selectedDueDate!.toIso8601String(),
+    priority: _selectedPriority,
+    status: _selectedStatus,
+  );
 
       await DatabaseHelper().insertTask(newTask);
 
@@ -218,7 +218,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                   ),
                 ),
 
-              // --- BLOCK 1: TITLE & DESCRIPTION ---
               const Text('Task Title', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF1A202C))),
               const SizedBox(height: 8),
               TextFormField(
@@ -268,7 +267,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
               const SizedBox(height: 20),
 
-              // --- BLOCK 2: ASSIGN TO ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -322,7 +320,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
               const SizedBox(height: 20),
 
-              // --- BLOCK 3: DUE DATE ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -388,7 +385,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
               const SizedBox(height: 20),
 
-              // --- BLOCK 4: PRIORITY ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -434,7 +430,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
               const SizedBox(height: 20),
 
-              // --- BLOCK 4: STATUS ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -480,7 +475,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
               const SizedBox(height: 32),
 
-              // --- SAVE ACTION BUTTON ---
               SizedBox(
                 width: double.infinity,
                 height: 50,
