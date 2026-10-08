@@ -28,43 +28,49 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
 
   // Fetches real data from SQLite and calculates the SLA totals
   Future<void> _loadStatistics() async {
-    final dbHelper = DatabaseHelper();
-    final tasks = await dbHelper.getTasks();
+    try {
+      final dbHelper = DatabaseHelper();
+      final tasks = await dbHelper.getTasks();
 
-    int onTrack = 0;
-    int atRisk = 0;
-    int overdue = 0;
-    int completed = 0;
+      int onTrack = 0;
+      int atRisk = 0;
+      int overdue = 0;
+      int completed = 0;
 
-    // Iterate through real tasks and use our SLA logic to build chart data
-    for (var task in tasks) {
-      String status = task.slaStatus; 
-      if (status == 'Completed') {
-        completed++;
-      } else if (status == 'Overdue') {
-        overdue++;
-      } else if (status == 'At Risk') {
-        atRisk++;
-      } else {
-        onTrack++;
+      // Iterate through real tasks and use our SLA logic to build chart data
+      for (var task in tasks) {
+        String status = task.slaStatus; 
+        if (status == 'Completed') {
+          completed++;
+        } else if (status == 'Overdue') {
+          overdue++;
+        } else if (status == 'At Risk') {
+          atRisk++;
+        } else {
+          onTrack++;
+        }
       }
+
+      // Sort tasks by due date so the most pressing ones appear first
+      tasks.sort((a, b) {
+        DateTime dateA = DateTime.tryParse(a.dueDate) ?? DateTime.now();
+        DateTime dateB = DateTime.tryParse(b.dueDate) ?? DateTime.now();
+        return dateA.compareTo(dateB);
+      });
+
+      if (!mounted) return;
+      setState(() {
+        _tasks = tasks;
+        _onTrackCount = onTrack;
+        _atRiskCount = atRisk;
+        _overdueCount = overdue;
+        _completedCount = completed;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
     }
-
-    // Sort tasks by due date so the most pressing ones appear first
-    tasks.sort((a, b) {
-      DateTime dateA = DateTime.tryParse(a.dueDate) ?? DateTime.now();
-      DateTime dateB = DateTime.tryParse(b.dueDate) ?? DateTime.now();
-      return dateA.compareTo(dateB);
-    });
-
-    setState(() {
-      _tasks = tasks;
-      _onTrackCount = onTrack;
-      _atRiskCount = atRisk;
-      _overdueCount = overdue;
-      _completedCount = completed;
-      _isLoading = false;
-    });
   }
 
   @override

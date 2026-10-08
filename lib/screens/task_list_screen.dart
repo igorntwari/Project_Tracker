@@ -4,6 +4,7 @@ import '../models/task_model.dart';
 import '../models/user.dart';
 import '../widgets/main_app_bar.dart';
 import '../widgets/task_widgets.dart';
+import 'create_task_screen.dart';
 import 'task_details_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
@@ -40,17 +41,24 @@ class _TaskListScreenState extends State<TaskListScreen> {
     super.dispose();
   }
 
-  // Fetches tasks and users from SQLite so each card can show its assignee
+  // Fetches tasks and users from storage so each card can show its assignee
   Future<void> _loadTasks() async {
-    final tasks = await _dbHelper.getTasks();
-    final users = await _dbHelper.getUsers();
+    try {
+      final tasks = await _dbHelper.getTasks();
+      final users = await _dbHelper.getUsers();
 
-    if (!mounted) return;
-    setState(() {
-      _tasks = tasks;
-      _usersById = {for (var user in users) user.id!: user};
-      _isLoading = false;
-    });
+      if (!mounted) return;
+      setState(() {
+        _tasks = tasks;
+        _usersById = {for (var user in users) user.id!: user};
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   // Applies the search text, the SLA filter chip and the chosen sort order
@@ -126,9 +134,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
         foregroundColor: Colors.white,
         shape: const CircleBorder(),
         onPressed: () async {
-          // Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTaskScreen()));
-          // Un-comment when the Create Task screen is merged, then reload the list:
-          // _loadTasks();
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateTaskScreen()),
+          );
+          if (result == true) {
+            _loadTasks();
+          }
         },
         child: const Icon(Icons.add, size: 30),
       ),

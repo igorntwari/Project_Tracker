@@ -222,7 +222,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _titleController,
-                onChanged: (_) => _resetErrorNotice(),
+               onChanged: (_) {
+                  if (_globalErrorNotice != null) {
+                    setState(() {
+                      _globalErrorNotice = null;
+                    });
+                  }
+                },
+
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Enter task title',

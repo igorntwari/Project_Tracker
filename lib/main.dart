@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/create_task_screen.dart';
+
+import 'widgets/task_widgets.dart';
+import 'screens/signin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,18 +10,17 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Project & SLA Task Tracker',
       debugShowCheckedModeBanner: false,
+      title: 'Project & SLA Task Tracker',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1D61E7),
-        ),
-        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: kPrimaryBlue),
       ),
-      home: const CreateTaskScreen(),
+      // MainScreen holds the bottom navigation bar (Home, Tasks, Team, Profile)
+      home: const SignInScreen(),
     );
   }
 }
