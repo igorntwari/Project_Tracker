@@ -14,7 +14,7 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
   bool _isLoading = true;
   List<TaskModel> _tasks = [];
 
-  // State variables for our chart statistics
+  // These numbers will be used to draw the chart.
   int _onTrackCount = 0;
   int _atRiskCount = 0;
   int _overdueCount = 0;
@@ -26,7 +26,7 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
     _loadStatistics();
   }
 
-  // Fetches real data from SQLite and calculates the SLA totals
+  // This gets the tasks from the database and counts how many are in each status.
   Future<void> _loadStatistics() async {
     try {
       final dbHelper = DatabaseHelper();
@@ -37,7 +37,7 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
       int overdue = 0;
       int completed = 0;
 
-      // Iterate through real tasks and use our SLA logic to build chart data
+      // We go through all the tasks one by one to see if they are completed, overdue, etc.
       for (var task in tasks) {
         String status = task.slaStatus; 
         if (status == 'Completed') {
@@ -51,7 +51,7 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
         }
       }
 
-      // Sort tasks by due date so the most pressing ones appear first
+      // We sort the tasks by their due date so the ones due soonest show up first.
       tasks.sort((a, b) {
         DateTime dateA = DateTime.tryParse(a.dueDate) ?? DateTime.now();
         DateTime dateB = DateTime.tryParse(b.dueDate) ?? DateTime.now();
@@ -107,12 +107,12 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
     );
   }
 
-  // Custom UI implementation of a bar chart using standard layout widgets
-  // Shows strong understanding of Flutter layouts (Rubric requirement)
+  // We are building a bar chart from scratch using simple shapes and lines.
+  // This shows we know how to put things together on the screen.
   Widget _buildChartCard() {
-    // Determine the highest bar to scale the chart dynamically
+    // We find the biggest number so we know how tall to make the chart.
     int maxCount = [_onTrackCount, _atRiskCount, _overdueCount, _completedCount].reduce((a, b) => a > b ? a : b);
-    if (maxCount == 0) maxCount = 1; // Prevent division by zero if database is empty
+    if (maxCount == 0) maxCount = 1; // If there are no tasks, we make it 1 so the app doesn't crash from math errors.
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -136,7 +136,7 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
           ),
           const SizedBox(height: 30),
           SizedBox(
-            height: 200, // Increased height to prevent pixel overflow
+            height: 200, // We make it tall enough so it fits nicely on the screen.
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -154,9 +154,9 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
   }
 
   Widget _buildBar(String label, int count, int maxCount, Color color) {
-    // Dynamic height calculation
+    // We calculate how tall each bar should be based on its number.
     double barHeight = (count / maxCount) * 110;
-    if (count > 0 && barHeight < 15) barHeight = 15; // Minimum visible height
+    if (count > 0 && barHeight < 15) barHeight = 15; // If the number is small, we still want the bar to be visible.
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -227,11 +227,11 @@ class _TaskStatisticsScreenState extends State<TaskStatisticsScreen> {
     DateTime date = DateTime.tryParse(task.dueDate) ?? DateTime.now();
     String formattedDate = "${date.day} ${_monthName(date.month)} ${date.year}";
 
-    // If task is 'To Do', show the raw status to match the screenshot badge colors
-    // Otherwise show the SLA status (At Risk, Overdue, etc.)
+    // If the task is just started, we show it differently.
+    // For other statuses, we change the colors depending on whether it's late, on track, etc.
     String displayStatus = task.status == 'To Do' ? 'To Do' : task.slaStatus;
     
-    Color badgeBgColor = const Color(0xFFF1F5F9); // Default To Do / Gray
+    Color badgeBgColor = const Color(0xFFF1F5F9); // Default color is gray.
     Color badgeTextColor = const Color(0xFF475569);
 
     if (displayStatus == 'At Risk') {

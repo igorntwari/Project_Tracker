@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../database/database_helper.dart';
 import '../models/user.dart';
+import 'signin.dart';
 
 class ProfileScreen extends StatefulWidget {
-  // Called by the back button when Profile is shown as a tab (goes to the previous tab)
+  // This handles going back to the previous screen when we press the back button.
   final VoidCallback? onBack;
 
   const ProfileScreen({super.key, this.onBack});
@@ -14,7 +15,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Real data variables instead of mock data
+  // Variables to store the actual user details.
   User? _currentUser;
   bool _isLoading = true;
 
@@ -24,14 +25,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadUserData();
   }
 
-  // Fetch the user data from SQLite
+  // This function gets the user info from the database.
   Future<void> _loadUserData() async {
     final dbHelper = DatabaseHelper();
     
-    // Fetch logged-in user profile
+    // We fetch the profile of the user who is logged in.
     final user = await dbHelper.getUser(1);
     
-    // Update the UI
+    // After getting the data, we tell the screen to update and show it.
     setState(() {
       _currentUser = user;
       _isLoading = false;
@@ -41,16 +42,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Matching the light grayish-blue background from the screenshot
+      // Setting the background color.
       backgroundColor: const Color(0xFFF7F9FC), 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark, // Makes battery/time icons dark
+        systemOverlayStyle: SystemUiOverlayStyle.dark, // This makes the icons at the top of the phone screen dark.
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // As a tab, go back to the previous tab; when pushed, pop the route
+            // If we have a back function, we call it. Otherwise, we just close this screen.
             if (widget.onBack != null) {
               widget.onBack!();
             } else {
@@ -67,8 +68,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         centerTitle: true,
       ),
-      // Using SingleChildScrollView to strictly avoid pixel overflow errors.
-      // We first check if it's loading, then if user exists.
+      // We make the screen scrollable so content doesn't get cut off on small screens.
+      // First we show a loading circle. When it's done, we check if we found the user.
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator())
           : _currentUser == null
@@ -79,17 +80,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       children: [
                         const SizedBox(height: 30),
-                        // User Avatar Container
+                        // This draws the circle for the user's picture or initials.
                         Container(
                           width: 100,
                           height: 100,
                           decoration: const BoxDecoration(
-                            color: Color(0xFF4A89DF), // Blue color from screenshot
+                            color: Color(0xFF4A89DF), // Setting the circle's color.
                             shape: BoxShape.circle,
                           ),
                           child: Center(
                             child: Text(
-                              _currentUser!.initials, // Real data
+                              _currentUser!.initials, // We put the user's initials here.
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 36,
@@ -99,9 +100,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // User Name
+                        // This shows the user's name.
                         Text(
-                          _currentUser!.name, // Real data
+                          _currentUser!.name, // We get the actual name from the user object.
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
@@ -109,9 +110,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        // User Role
+                        // This shows the user's job or role.
                         Text(
-                          _currentUser!.role, // Real data
+                          _currentUser!.role, // We get the actual role from the user object.
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.blueGrey,
@@ -119,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 40),
-                        // Menu Options Card wrapped in a Container with rounded corners and slight shadow
+                        // This is a box that holds the menu buttons. It has curved corners and a tiny shadow.
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -155,9 +156,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               _buildMenuItem(
                                 icon: Icons.logout,
                                 title: 'Sign Out',
-                                textColor: const Color(0xFFD32F2F), // Red color for Sign Out
+                                textColor: const Color(0xFFD32F2F), // We make the sign out text red.
                                 iconColor: const Color(0xFFD32F2F),
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                                    MaterialPageRoute(builder: (_) => const SignInScreen()),
+                                    (route) => false,
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -170,8 +176,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Local helper method to keep code DRY (Don't Repeat Yourself)
-  // Extracts repeating list tile UI into a single reusable widget structure.
+  // This is a small helper function so we don't have to copy-paste the same code for every menu item.
+  // It builds a row with an icon and some text.
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
@@ -187,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Icon(icon, color: iconColor, size: 24),
             const SizedBox(width: 16),
-            // Expanded prevents the text from overflowing the row if it's too long
+            // 'Expanded' makes sure the text fits on the screen without causing errors.
             Expanded(
               child: Text(
                 title,
