@@ -48,3 +48,7 @@ Project Tracker is a local first application that lets you assign tasks to team 
 ## About This Project
 
 This project was built with a focus on clean UI UX and fundamental mobile development concepts. It demonstrates how to integrate a local database build custom painted widgets like charts and manage application state using standard Flutter tools. It serves as a great example of a complete functional app structure.
+
+## Scrum Board
+
+You can track our progress and upcoming features on our Trello board: [Project Tracker Scrum Board](https://trello.com/b/bgfI9syf/project-tracker)
