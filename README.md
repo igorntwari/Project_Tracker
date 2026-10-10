@@ -4,7 +4,7 @@ A modern easy to use Flutter application designed to help teams manage tasks tra
 
 ## Overview
 
-Project Tracker is a local first application that lets you assign tasks to team members set due dates and monitor deadlines to see if tasks are "On Track" "At Risk" or "Overdue". It is built with simplicity in mind providing a clean dashboard and visual charts to understand project health at a glance.
+Project Tracker is a local first application that lets you assign tasks to team members, set due dates and monitor deadlines to see if tasks are "On Track" "At Risk" or "Overdue". It is built with simplicity in mind providing a clean dashboard and visual charts to understand project health at a glance.
 
 ## Key Features
 
